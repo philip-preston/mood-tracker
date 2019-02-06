@@ -16,7 +16,7 @@ $router->get('/', function () use ($router) {
 });
 
 
-$router->middleware(['auth'])->group(function() use($router) {
+$router->group(['middleware' => 'auth'], function() use($router) {
 	$router->get('/mood', 'MoodController@show');
 	$router->post('/mood', 'MoodController@store');
 });

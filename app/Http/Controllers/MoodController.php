@@ -11,8 +11,11 @@ class MoodController extends Controller {
      * @return json Mood
      */
     public function show() {
+        $user = Auth::user();
+
         return json_encode([
-            'moods' => Auth::user()->moods->pluck('mood'),
+            'moods' => $user->moods->pluck('mood'),
+            'streak' => $user->currentStreak();
         ]);
     }
 
