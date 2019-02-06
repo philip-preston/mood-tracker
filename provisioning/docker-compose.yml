@@ -1,0 +1,10 @@
+version:
+services:
+  web:
+    image: mood-tracker-app
+    ports: 80:80
+  db:
+    image: mysql:8
+    environment:
+      MYSQL_USER: homestead
+      MYSQL_PASSWORD: homestead
