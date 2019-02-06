@@ -12,7 +12,7 @@ class MoodController extends Controller {
      */
     public function show() {
         return json_encode([
-            'moods' => Cache::get('moods'),
+            'moods' => Auth::user()->moods->pluck('mood'),
         ]);
     }
 
@@ -22,15 +22,10 @@ class MoodController extends Controller {
      * @return
      */
     public function store(Request $request) {
-        if (!Cache::has('moods')) {
-            // If cache is null, start it with an empty array
-            Cache::put('moods', []);
-        }
-
-        // Add new mood to array
-        $moods = Cache::get('moods');
-        $moods[] = $request->mood;
-        Cache::forever('moods', $moods);
+        Mood::create([
+            'user_id' => Auth::user()->id,
+            'mood' => $request->mood,
+        ]);
 
         return json_encode([
             'moods' => "{$request->mood} added",
