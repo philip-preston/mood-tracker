@@ -13,10 +13,17 @@ class MoodController extends Controller {
     public function show() {
         $user = Auth::user();
 
-        return json_encode([
+        $response = [
             'moods' => $user->moods->pluck('mood'),
-            'streak' => $user->currentStreak();
-        ]);
+            'streak' => $user->currentStreak(),
+        ]
+
+        $percentile = $user->streakPercentile()
+        if ($percentile >= 0.5) {
+            $response['percentile'] = round($percentile;
+        }
+
+        return json_encode($response);
     }
 
     /**

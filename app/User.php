@@ -62,4 +62,19 @@ class User extends Model implements AuthenticatableContract, AuthorizableContrac
                 ->where('created_at', '<', $i_date->addDays(1))->last()->mood;
         }
     }
+
+    public function streakPercentile() {
+        $streaks = collect([]);
+
+        foreach(User::all() as $user) {
+            $streaks->push($user->currentStreak());
+        }
+
+        // Sort list of streaks to get percentiles
+        // Get first index where your streak is listed
+        $index = $streaks->sort()->search($this->currentStreak());
+
+        // Percentile is posision / total steaks
+        return $index / $streaks->count();
+    }
 }

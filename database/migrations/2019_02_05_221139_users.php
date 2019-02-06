@@ -13,7 +13,11 @@ class Users extends Migration
      */
     public function up()
     {
-        //
+        Schema::create('users', function ($table) {
+            $table->increments('id');
+            $table->string('name');
+            $table->string('password');
+        });
     }
 
     /**
@@ -23,6 +27,6 @@ class Users extends Migration
      */
     public function down()
     {
-        //
+        Schema::dropIfExists('users');
     }
 }
