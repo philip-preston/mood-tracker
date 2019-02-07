@@ -16,6 +16,8 @@ class MoodController extends Controller {
         $response = [
             'moods' => $user->moods->pluck('mood'),
             'streak' => $user->currentStreak(),
+            'totals' => $user->moodCounts(),
+            'longest_streaks' => $user->longestStreaks(),
         ]
 
         $percentile = $user->streakPercentile()

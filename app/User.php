@@ -50,6 +50,10 @@ class User extends Model implements AuthenticatableContract, AuthorizableContrac
         $streak = 0;
         $latest_mood = $this->moods->last()->mood;
 
+        $first_mood_date = $this->moods->first()->created_at;
+
+
+
         $i_date = Carbon::today();
         $i_mood = $this->moods()->where('created_at', '>=', Carbon::today())
             ->where('created_at', '<', Carbon::tomorrow())->last()->mood;
@@ -57,7 +61,7 @@ class User extends Model implements AuthenticatableContract, AuthorizableContrac
         while ($latest_mood == $i_mood) {
             $streak++;
 
-            $i_date = $i_date->addDays(1);
+            $i_date = $i_date->subDays(1);
             $i_mood = $this->moods()->where('created_at', '>=', $i_date)
                 ->where('created_at', '<', $i_date->addDays(1))->last()->mood;
         }
@@ -74,7 +78,48 @@ class User extends Model implements AuthenticatableContract, AuthorizableContrac
         // Get first index where your streak is listed
         $index = $streaks->sort()->search($this->currentStreak());
 
-        // Percentile is posision / total steaks
+        // Percentile is position / total steaks
         return $index / $streaks->count();
+    }
+
+    public function moodCounts() {
+        return $this->moods()->select('mood', DB::raw('COUNT(*) as count'))->groupBy('mood');
+    }
+
+    public function longestStreaks() {
+        // Longest streaks
+        $longest_steaks = [];
+        $current_streaks = [];
+        $first_mood_day = Carbon::parse($this->moods->first()->created_at)->subDays(1);
+
+        // Loop through all moods
+        for ($day = Carbon::today(); $day >= $first_mood_day) {
+            $days_moods = $this->moods()->where('created_by', '<=', $day)
+                ->where('created_by', '>', $day->addDay(1));
+            $unique_moods = $days->pluck('moods')->unique();
+
+            foreach ($unique_moods as $mood) {
+                if (!array_key_exists($mood)) {
+                    // Add row to array, if first time we've seen it
+                    $current_streaks[$mood] = 1;
+                    $longest_steaks[$mood] = 1;
+                } else () {
+                    $current_streaks[$mood]++;
+                    if ($current_streaks[$mood] > $longest_streaks[$mood]) {
+                        // If longest streak for this mood has been broken, set it
+                        $longest_steaks[$mood] = $current_streaks[$mood];
+                    }
+                }
+            }
+
+            // If mood is in current streaks list, but not in the list for today, reset the streak
+            foreach (array_keys($current_streaks) as $mood) {
+                if (!in_array($mood, $unique_moods)) {
+                    $current_streaks[$mood] = 0;
+                }
+            }
+        }
+
+        return $longest_steaks;
     }
 }
